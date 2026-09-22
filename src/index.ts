@@ -19,6 +19,10 @@ import { adminDashboardView } from './views/admin/dashboard';
 import { adminClientsView } from './views/admin/clients';
 import { adminUsersView } from './views/admin/users';
 
+// Documentation & AI Agent Views
+import { docsView } from './views/docs';
+import { LLMS_TXT_CONTENT, IDP_METADATA } from './docs-data';
+
 const app = new Hono<{
   Bindings: Env;
   Variables: {
@@ -273,6 +277,37 @@ app.get('/consent', async (c) => {
       user: session.user,
     })
   );
+});
+
+// -------------------------------------------------------------
+// Developer & AI Agent Knowledge Hub
+// -------------------------------------------------------------
+
+// Interactive Documentation Page
+app.get('/docs', async (c) => {
+  const session = await getSession(c);
+  return c.html(docsView({ user: session?.user }));
+});
+
+// Emerging Standard for LLM / AI Coding Agents (llms.txt)
+const handleLlmsTxt = (c: any) => {
+  return c.text(LLMS_TXT_CONTENT, 200, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'public, max-age=3600',
+  });
+};
+app.get('/llms.txt', handleLlmsTxt);
+app.get('/llms-full.txt', handleLlmsTxt);
+app.get('/.well-known/llms.txt', handleLlmsTxt);
+
+// Machine-readable AI Agent API Specification (JSON)
+app.get('/api/docs/ai', (c) => {
+  return c.json({
+    status: 'success',
+    idp: IDP_METADATA,
+    llms_txt_url: 'https://accounts.ten.my.id/llms.txt',
+    integration_guide_summary: 'To integrate any satellite app (*.ten.my.id or localhost), register a client in /admin/clients, configure the redirect URI, and use the OIDC Authorization Code Flow with PKCE. Tokens can be validated against the JWKS endpoint.',
+  });
 });
 
 // Legacy URL backwards compatibility

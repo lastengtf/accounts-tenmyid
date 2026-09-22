@@ -105,6 +105,9 @@ export function layout({ title, user, content, scripts = "", activeNav = "" }: L
         ${user ? `
           <!-- Desktop Nav Links -->
           <div class="hidden sm:flex items-center gap-3">
+            <a href="/docs" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+              Dokumentasi
+            </a>
             ${user.role === 'admin' ? `
               <a href="/admin" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition flex items-center gap-1.5 px-2.5 py-1 rounded bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800">
                 <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
@@ -122,6 +125,9 @@ export function layout({ title, user, content, scripts = "", activeNav = "" }: L
 
           <!-- Mobile Quick Identity Pill -->
           <div class="flex sm:hidden items-center gap-2">
+            <a href="/docs" class="p-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition" title="Dokumentasi">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </a>
             ${user.role === 'admin' ? `
               <span class="text-[10px] bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-semibold px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
                 ADMIN
@@ -134,6 +140,9 @@ export function layout({ title, user, content, scripts = "", activeNav = "" }: L
             </button>
           </div>
         ` : `
+          <a href="/docs" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition px-2 py-1.5">
+            Dokumentasi
+          </a>
           <a href="/login" class="text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition px-2.5 py-1.5">
             Masuk
           </a>
@@ -157,11 +166,13 @@ export function layout({ title, user, content, scripts = "", activeNav = "" }: L
         &copy; ${new Date().getFullYear()} TEN IDP &bull; Centralized Identity Provider
       </div>
       <div class="flex items-center gap-4 text-zinc-400 dark:text-zinc-600">
+        <a href="/docs" class="hover:text-zinc-800 dark:hover:text-zinc-200 transition font-medium">Dokumentasi</a>
+        <span>&bull;</span>
+        <a href="/llms.txt" target="_blank" class="hover:text-zinc-800 dark:hover:text-zinc-200 transition font-mono">llms.txt</a>
+        <span>&bull;</span>
         <span>OAuth 2.1 / OIDC</span>
         <span>&bull;</span>
         <span>Cloudflare Edge</span>
-        <span>&bull;</span>
-        <span>Better Auth</span>
       </div>
     </div>
   </footer>
