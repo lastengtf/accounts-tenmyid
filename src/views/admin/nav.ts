@@ -1,22 +1,23 @@
 export function adminNav(activeTab: 'dashboard' | 'clients' | 'users' | 'settings'): string {
   const tabs = [
-    { id: 'dashboard', label: 'Ringkasan Sistem', href: '/admin' },
-    { id: 'clients', label: 'Aplikasi Satelit (OAuth)', href: '/admin/clients' },
-    { id: 'users', label: 'Direktori Pengguna', href: '/admin/users' },
+    { id: 'dashboard', label: 'Ringkasan', href: '/admin' },
+    { id: 'clients', label: 'Aplikasi Satelit', href: '/admin/clients' },
+    { id: 'users', label: 'Pengguna', href: '/admin/users' },
   ];
 
   return `
-    <div class="border-b border-zinc-200 dark:border-zinc-800 mb-6">
-      <nav class="flex space-x-6">
+    <div class="mb-5 sm:mb-6">
+      <!-- Native App Segmented Control -->
+      <nav class="bg-zinc-200/60 dark:bg-zinc-800/60 p-1 rounded-xl flex items-center gap-1 max-w-lg shadow-inner">
         ${tabs.map(tab => {
           const isActive = tab.id === activeTab;
           return `
             <a 
               href="${tab.href}" 
-              class="pb-3 text-xs font-medium transition border-b-2 ${
+              class="flex-1 py-2 px-2.5 text-center text-xs font-medium rounded-lg transition-all touch-press ${
                 isActive 
-                  ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400 font-semibold' 
-                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                  ? 'bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' 
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
               }"
             >
               ${tab.label}

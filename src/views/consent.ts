@@ -17,60 +17,60 @@ export function consentView({ clientId, clientName, scopes, user }: ConsentProps
     openid: {
       label: 'Identitas Pengguna (OpenID)',
       desc: 'Mengakses ID unik akun Anda untuk memverifikasi autentikasi.',
-      icon: `<svg class="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>`
+      icon: `<svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>`
     },
     profile: {
       label: 'Informasi Profil Dasar',
       desc: 'Melihat nama lengkap, foto profil, dan preferensi akun Anda.',
-      icon: `<svg class="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" /></svg>`
+      icon: `<svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" /></svg>`
     },
     email: {
       label: 'Alamat Email',
       desc: 'Melihat alamat email primer dan status verifikasi email Anda.',
-      icon: `<svg class="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`
+      icon: `<svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`
     }
   };
 
   const content = `
-    <div class="w-full max-w-md mx-auto">
-      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm">
+    <div class="w-full max-w-md mx-auto my-auto">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800/90 rounded-2xl p-6 sm:p-8 shadow-sm">
         
         <!-- App Identity Header -->
-        <div class="flex items-center gap-3 mb-6 pb-6 border-b border-zinc-200 dark:border-zinc-800">
-          <div class="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center font-bold text-zinc-700 dark:text-zinc-300 text-lg">
+        <div class="flex items-center gap-3.5 mb-5 pb-5 border-b border-zinc-200/80 dark:border-zinc-800/80">
+          <div class="w-13 h-13 rounded-2xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center font-bold text-zinc-800 dark:text-zinc-200 text-xl shadow-sm flex-shrink-0">
             ${escapeHtml(displayName.charAt(0).toUpperCase())}
           </div>
           <div>
-            <h1 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">
-              Otorisasi <span class="text-zinc-900 dark:text-zinc-50 underline decoration-zinc-300 underline-offset-2">${escapeHtml(displayName)}</span>
+            <h1 class="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+              Otorisasi ${escapeHtml(displayName)}
             </h1>
             <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Aplikasi ini meminta izin untuk mengakses akun TEN Anda.
+              Aplikasi ini meminta izin untuk mengakses akun TEN Anda via SSO.
             </p>
           </div>
         </div>
 
         <!-- Current User Card -->
-        <div class="mb-5 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-between">
+        <div class="mb-5 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/60 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center font-semibold text-xs text-zinc-700 dark:text-zinc-300">
+            <div class="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 flex items-center justify-center font-bold text-xs">
               ${escapeHtml(user.name.charAt(0).toUpperCase())}
             </div>
             <div>
-              <div class="text-xs font-medium text-zinc-900 dark:text-zinc-100">${escapeHtml(user.name)}</div>
+              <div class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">${escapeHtml(user.name)}</div>
               <div class="text-[11px] text-zinc-500">${escapeHtml(user.email)}</div>
             </div>
           </div>
-          <span class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
-            Masuk
+          <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+            Aktif
           </span>
         </div>
 
-        <div id="consent-alert" class="hidden mb-4 p-3 rounded-lg text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400"></div>
+        <div id="consent-alert" class="hidden mb-4 p-3 rounded-xl text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400"></div>
 
         <!-- Requested Scopes -->
         <div class="space-y-3 mb-6">
-          <div class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          <div class="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
             Izin Yang Diminta:
           </div>
 
@@ -78,15 +78,15 @@ export function consentView({ clientId, clientName, scopes, user }: ConsentProps
             ${scopes.map(scope => {
               const info = scopeDescriptions[scope] || {
                 label: scope,
-                desc: 'Izin tambahan yang dibutuhkan oleh aplikasi ini.',
-                icon: `<svg class="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+                desc: 'Izin akses data tambahan untuk aplikasi ini.',
+                icon: `<svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
               };
               return `
-                <div class="flex items-start gap-3 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+                <div class="flex items-start gap-3 p-3 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
                   <div class="mt-0.5 flex-shrink-0">${info.icon}</div>
                   <div>
-                    <div class="text-xs font-medium text-zinc-900 dark:text-zinc-200">${info.label}</div>
-                    <div class="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">${info.desc}</div>
+                    <div class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">${info.label}</div>
+                    <div class="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed mt-0.5">${info.desc}</div>
                   </div>
                 </div>
               `;
@@ -95,7 +95,7 @@ export function consentView({ clientId, clientName, scopes, user }: ConsentProps
         </div>
 
         <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed">
-          Dengan menyetujui, Anda mengizinkan aplikasi ini untuk mengakses informasi Anda sesuai dengan Kebijakan Privasi TEN. Anda dapat mencabut akses kapan saja melalui profil Anda.
+          Dengan menyetujui, Anda mengizinkan aplikasi ini untuk mengakses data akun Anda sesuai Kebijakan Privasi TEN. Anda dapat mencabut izin kapan saja dari menu Akun Saya.
         </p>
 
         <!-- Actions -->
@@ -103,14 +103,14 @@ export function consentView({ clientId, clientName, scopes, user }: ConsentProps
           <button 
             type="button" 
             id="deny-btn"
-            class="flex-1 py-2.5 px-4 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-xs hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+            class="flex-1 py-3.5 sm:py-2.5 px-4 rounded-xl border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold text-xs hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-[0.98] transition touch-press"
           >
             Tolak
           </button>
           <button 
             type="button" 
             id="approve-btn"
-            class="flex-1 py-2.5 px-4 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 font-medium text-xs hover:bg-zinc-800 dark:hover:bg-zinc-200 transition flex items-center justify-center gap-2"
+            class="flex-1 py-3.5 sm:py-2.5 px-4 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 font-semibold text-xs hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition flex items-center justify-center gap-2 shadow-sm touch-press"
           >
             Setujui & Lanjutkan
           </button>
@@ -165,7 +165,6 @@ export function consentView({ clientId, clientName, scopes, user }: ConsentProps
           if (data.redirect_uri || data.url) {
             window.location.href = data.redirect_uri || data.url;
           } else {
-            // Fallback: reload or redirect to app callback
             window.location.reload();
           }
         } catch (err) {

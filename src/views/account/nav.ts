@@ -1,22 +1,23 @@
 export function accountNav(activeTab: 'profile' | 'security' | 'apps'): string {
   const tabs = [
-    { id: 'profile', label: 'Profil Saya', href: '/account' },
-    { id: 'security', label: 'Keamanan & Sesi', href: '/account/security' },
-    { id: 'apps', label: 'Aplikasi Terhubung', href: '/account/apps' },
+    { id: 'profile', label: 'Profil', href: '/account' },
+    { id: 'security', label: 'Keamanan', href: '/account/security' },
+    { id: 'apps', label: 'Aplikasi', href: '/account/apps' },
   ];
 
   return `
-    <div class="border-b border-zinc-200 dark:border-zinc-800 mb-6">
-      <nav class="flex space-x-6">
+    <div class="mb-5 sm:mb-6">
+      <!-- Native App Segmented Control -->
+      <nav class="bg-zinc-200/60 dark:bg-zinc-800/60 p-1 rounded-xl flex items-center gap-1 max-w-md shadow-inner">
         ${tabs.map(tab => {
           const isActive = tab.id === activeTab;
           return `
             <a 
               href="${tab.href}" 
-              class="pb-3 text-xs font-medium transition border-b-2 ${
+              class="flex-1 py-2 px-2.5 text-center text-xs font-medium rounded-lg transition-all touch-press ${
                 isActive 
-                  ? 'border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100 font-semibold' 
-                  : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm font-semibold' 
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
               }"
             >
               ${tab.label}

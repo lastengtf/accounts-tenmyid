@@ -10,44 +10,44 @@ export interface AccountSecurityProps {
 
 export function accountSecurityView({ user, sessions = [], currentSessionToken = '' }: AccountSecurityProps): string {
   const content = `
-    <div class="w-full max-w-2xl mx-auto">
+    <div class="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6">
       
       <!-- Page Header -->
-      <div class="mb-4">
-        <h1 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
           Keamanan Akun
         </h1>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Kelola kata sandi dan pantau sesi masuk yang sedang aktif di perangkat Anda.
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+          Kredensial login, kata sandi, dan sesi aktif perangkat.
         </p>
       </div>
 
       ${accountNav('security')}
 
-      <div class="space-y-6">
-        <!-- Change Password Card -->
-        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-4">
+      <div class="space-y-4 sm:space-y-6">
+        <!-- Change Password Card (Native Form) -->
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800/90 rounded-2xl p-5 sm:p-6 shadow-sm">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-4">
             Ubah Kata Sandi
           </h2>
 
-          <div id="password-alert" class="hidden mb-4 p-3 rounded-lg text-xs"></div>
+          <div id="password-alert" class="hidden mb-4 p-3 rounded-xl text-xs"></div>
 
-          <form id="password-form" class="space-y-4 max-w-md">
+          <form id="password-form" class="space-y-4">
             <div>
-              <label for="current-password" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label for="current-password" class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Kata Sandi Saat Ini
               </label>
               <input 
                 type="password" 
                 id="current-password" 
                 required
-                class="w-full px-3 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition"
+                class="w-full px-3.5 py-3 sm:py-2 text-base sm:text-sm rounded-xl border border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition"
               />
             </div>
 
             <div>
-              <label for="new-password" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label for="new-password" class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Kata Sandi Baru
               </label>
               <input 
@@ -56,70 +56,74 @@ export function accountSecurityView({ user, sessions = [], currentSessionToken =
                 required
                 minlength="8"
                 placeholder="Minimal 8 karakter"
-                class="w-full px-3 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition"
+                class="w-full px-3.5 py-3 sm:py-2 text-base sm:text-sm rounded-xl border border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition"
               />
             </div>
 
             <div>
-              <label for="confirm-new-password" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label for="confirm-new-password" class="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Konfirmasi Kata Sandi Baru
               </label>
               <input 
                 type="password" 
                 id="confirm-new-password" 
                 required
-                class="w-full px-3 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition"
+                class="w-full px-3.5 py-3 sm:py-2 text-base sm:text-sm rounded-xl border border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition"
               />
             </div>
 
-            <button 
-              type="submit" 
-              id="password-submit-btn"
-              class="py-2 px-4 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 font-medium text-xs hover:bg-zinc-800 dark:hover:bg-zinc-200 transition"
-            >
-              Perbarui Kata Sandi
-            </button>
+            <div class="pt-2">
+              <button 
+                type="submit" 
+                id="password-submit-btn"
+                class="w-full sm:w-auto py-3 sm:py-2.5 px-6 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 font-semibold text-xs hover:bg-zinc-800 dark:hover:bg-zinc-200 active:scale-[0.98] transition shadow-sm"
+              >
+                Perbarui Kata Sandi
+              </button>
+            </div>
           </form>
         </div>
 
         <!-- Active Sessions Card -->
-        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-          <div class="flex items-center justify-between mb-4">
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800/90 rounded-2xl p-5 sm:p-6 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                 Sesi Perangkat Aktif (${sessions.length})
               </h2>
-              <p class="text-xs text-zinc-500 mt-0.5">Perangkat dan browser yang saat ini terhubung ke akun Anda.</p>
+              <p class="text-xs text-zinc-500 mt-0.5">Perangkat yang saat ini terautentikasi ke akun Anda.</p>
             </div>
 
             ${sessions.length > 1 ? `
               <button 
                 id="revoke-other-sessions-btn"
-                class="text-xs px-2.5 py-1.5 rounded border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition font-medium"
+                class="w-full sm:w-auto text-xs px-3 py-2 rounded-xl border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 active:scale-[0.98] transition font-semibold"
               >
                 Keluar Dari Perangkat Lain
               </button>
             ` : ''}
           </div>
 
-          <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <div class="divide-y divide-zinc-200/80 dark:divide-zinc-800/80">
             ${sessions.map(s => {
               const isCurrent = s.token === currentSessionToken;
               return `
-                <div class="py-3 flex items-center justify-between first:pt-0 last:pb-0">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <div class="py-3.5 flex items-start sm:items-center justify-between gap-3 first:pt-0 last:pb-0">
+                  <div class="flex items-start sm:items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 flex-shrink-0 mt-0.5 sm:mt-0">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                      </svg>
                     </div>
                     <div>
-                      <div class="text-xs font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                        <span>${escapeHtml(s.userAgent || 'Browser Tidak Dikenal')}</span>
+                      <div class="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex flex-wrap items-center gap-2">
+                        <span class="break-all">${escapeHtml(s.userAgent || 'Browser')}</span>
                         ${isCurrent ? `
-                          <span class="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 px-1.5 py-0.5 rounded font-medium">Perangkat Ini</span>
+                          <span class="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full font-bold">Perangkat Ini</span>
                         ` : ''}
                       </div>
-                      <div class="text-[11px] text-zinc-500">
-                        IP: <code class="font-mono">${escapeHtml(s.ipAddress || '127.0.0.1')}</code> &bull; Berakhir: ${new Date(s.expiresAt).toLocaleDateString('id-ID')}
+                      <div class="text-[11px] text-zinc-500 mt-0.5">
+                        IP: <code class="font-mono">${escapeHtml(s.ipAddress || '127.0.0.1')}</code> &bull; Exp: ${new Date(s.expiresAt).toLocaleDateString('id-ID')}
                       </div>
                     </div>
                   </div>
@@ -142,14 +146,14 @@ export function accountSecurityView({ user, sessions = [], currentSessionToken =
 
       pwdForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        pwdAlert.className = 'hidden mb-4 p-3 rounded-lg text-xs';
+        pwdAlert.className = 'hidden mb-4 p-3 rounded-xl text-xs';
         
         const currentPassword = document.getElementById('current-password').value;
         const newPassword = document.getElementById('new-password').value;
         const confirmNewPassword = document.getElementById('confirm-new-password').value;
 
         if (newPassword !== confirmNewPassword) {
-          pwdAlert.className = 'mb-4 p-3 rounded-lg text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400';
+          pwdAlert.className = 'mb-4 p-3 rounded-xl text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400';
           pwdAlert.textContent = 'Konfirmasi kata sandi baru tidak cocok.';
           return;
         }
@@ -166,20 +170,20 @@ export function accountSecurityView({ user, sessions = [], currentSessionToken =
 
           const data = await res.json();
           if (!res.ok) {
-            pwdAlert.className = 'mb-4 p-3 rounded-lg text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400';
+            pwdAlert.className = 'mb-4 p-3 rounded-xl text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400';
             pwdAlert.textContent = data.message || data.error || 'Gagal mengubah kata sandi.';
             pwdBtn.disabled = false;
             pwdBtn.textContent = 'Perbarui Kata Sandi';
             return;
           }
 
-          pwdAlert.className = 'mb-4 p-3 rounded-lg text-xs bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400';
+          pwdAlert.className = 'mb-4 p-3 rounded-xl text-xs bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400';
           pwdAlert.textContent = 'Kata sandi berhasil diperbarui.';
           pwdForm.reset();
           pwdBtn.disabled = false;
           pwdBtn.textContent = 'Perbarui Kata Sandi';
         } catch (err) {
-          pwdAlert.className = 'mb-4 p-3 rounded-lg text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400';
+          pwdAlert.className = 'mb-4 p-3 rounded-xl text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400';
           pwdAlert.textContent = 'Terjadi kesalahan jaringan.';
           pwdBtn.disabled = false;
           pwdBtn.textContent = 'Perbarui Kata Sandi';
@@ -190,8 +194,12 @@ export function accountSecurityView({ user, sessions = [], currentSessionToken =
       document.getElementById('revoke-other-sessions-btn')?.addEventListener('click', async () => {
         if (!confirm('Keluar dari semua sesi di perangkat lain?')) return;
         try {
-          await fetch('/api/auth/revoke-other-sessions', { method: 'POST' });
-          window.location.reload();
+          const res = await fetch('/api/auth/revoke-other-sessions', { method: 'POST' });
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('Gagal mencabut sesi lain.');
+          }
         } catch {
           alert('Gagal mencabut sesi lain.');
         }
@@ -199,5 +207,5 @@ export function accountSecurityView({ user, sessions = [], currentSessionToken =
     </script>
   `;
 
-  return layout({ title: 'Keamanan Akun', user, content, scripts });
+  return layout({ title: 'Keamanan Akun', user, content, scripts, activeNav: 'security' });
 }
