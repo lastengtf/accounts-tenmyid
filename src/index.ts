@@ -7,6 +7,7 @@ import { loginView } from './views/login';
 import { registerView } from './views/register';
 import { consentView } from './views/consent';
 import { profileView } from './views/profile';
+import { developersView } from './views/developers';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -217,6 +218,158 @@ app.get('/profile', async (c) => {
       authorizedApps,
     })
   );
+});
+
+// -------------------------------------------------------------
+// Developer Portal: Satellite Clients Management
+// -------------------------------------------------------------
+
+// Developer Portal View
+app.get('/developers', async (c) => {
+  const session = await getSession(c);
+  if (!session?.user) {
+    return c.redirect('/login?redirect=/developers');
+  }
+
+  let clients: any[] = [];
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT 
+        id, 
+        clientId, 
+        clientSecret, 
+        name, 
+        redirectUris, 
+        scopes, 
+        createdAt 
+      FROM oauthClient 
+      ORDER BY createdAt DESC
+    `).all<any>();
+
+    if (results) {
+      clients = results;
+    }
+  } catch (err) {
+    console.error('Error querying oauth clients:', err);
+  }
+
+  return c.html(
+    developersView({
+      user: session.user,
+      clients,
+    })
+  );
+});
+
+// Create new Satellite OAuth Client
+app.post('/api/developers/clients', async (c) => {
+  const session = await getSession(c);
+  if (!session?.user) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  try {
+    const body = await c.req.json<{
+      name: string;
+      clientId?: string;
+      redirectUris: string[];
+      skipConsent?: boolean;
+    }>();
+
+    if (!body.name || !body.redirectUris || body.redirectUris.length === 0) {
+      return c.json({ error: 'Nama aplikasi dan minimal satu Redirect URI wajib diisi.' }, 400);
+    }
+
+    const clientId = body.clientId
+      ? body.clientId.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-')
+      : (body.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + crypto.randomUUID().slice(0, 6));
+
+    // Generate secure 48-char random client secret
+    const rawSecret = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+    const clientSecret = 'sec_' + rawSecret.slice(0, 40);
+    const id = 'client_' + crypto.randomUUID().slice(0, 12);
+    const redirectUrisJson = JSON.stringify(body.redirectUris);
+    const now = Date.now();
+
+    await c.env.DB.prepare(`
+      INSERT INTO oauthClient (
+        id,
+        clientId,
+        clientSecret,
+        name,
+        redirectUris,
+        scopes,
+        skipConsent,
+        tokenEndpointAuthMethod,
+        grantTypes,
+        responseTypes,
+        createdAt,
+        updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      id,
+      clientId,
+      clientSecret,
+      body.name.trim(),
+      redirectUrisJson,
+      'openid profile email',
+      body.skipConsent ? 1 : 0,
+      'client_secret_post',
+      'authorization_code,refresh_token',
+      'code',
+      now,
+      now
+    ).run();
+
+    return c.json({
+      success: true,
+      clientId,
+      clientSecret,
+      name: body.name
+    });
+  } catch (err: any) {
+    console.error('Error creating oauth client:', err);
+    return c.json({ error: err.message || 'Gagal mendaftarkan klien' }, 500);
+  }
+});
+
+// Rotate Client Secret
+app.post('/api/developers/clients/:id/rotate', async (c) => {
+  const session = await getSession(c);
+  if (!session?.user) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const clientId = c.req.param('id');
+  try {
+    const rawSecret = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+    const newSecret = 'sec_' + rawSecret.slice(0, 40);
+    const now = Date.now();
+
+    await c.env.DB.prepare(
+      'UPDATE oauthClient SET clientSecret = ?, updatedAt = ? WHERE id = ?'
+    ).bind(newSecret, now, clientId).run();
+
+    return c.json({ success: true, newSecret });
+  } catch (err: any) {
+    return c.json({ error: err.message || 'Gagal memutar secret' }, 500);
+  }
+});
+
+// Delete Satellite Client
+app.delete('/api/developers/clients/:id', async (c) => {
+  const session = await getSession(c);
+  if (!session?.user) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const clientId = c.req.param('id');
+  try {
+    await c.env.DB.prepare('DELETE FROM oauthClient WHERE id = ?').bind(clientId).run();
+    return c.json({ success: true });
+  } catch (err: any) {
+    return c.json({ error: err.message || 'Gagal menghapus klien' }, 500);
+  }
 });
 
 export default app;

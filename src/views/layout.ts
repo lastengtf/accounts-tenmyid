@@ -49,6 +49,9 @@ export function layout({ title, user, content, scripts = "" }: LayoutProps): str
 
       <div class="flex items-center gap-3">
         ${user ? `
+          <a href="/developers" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition">
+            Klien Satelit
+          </a>
           <a href="/profile" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             ${escapeHtml(user.email)}
