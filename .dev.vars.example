@@ -1,0 +1,4 @@
+# Local development environment variables for Wrangler
+BETTER_AUTH_SECRET="dev-secret-key-please-replace-in-production-with-min-32-chars"
+BETTER_AUTH_URL="http://localhost:8787"
+ENVIRONMENT="development"

@@ -1,0 +1,37 @@
+{
+  "name": "accounts-tenmyid",
+  "version": "1.0.0",
+  "description": "Centralized Identity Provider (SSO / IAM) for ten.my.id running on Cloudflare Workers and D1",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "d1:migrate:local": "wrangler d1 execute accounts-db --local --file=./schema.sql",
+    "d1:migrate:remote": "wrangler d1 execute accounts-db --remote --file=./schema.sql"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "better-auth",
+    "oauth2",
+    "oidc",
+    "sso",
+    "iam",
+    "hono",
+    "d1"
+  ],
+  "author": "TEN-MY-ID",
+  "license": "MIT",
+  "dependencies": {
+    "@better-auth/oauth-provider": "^1.7.5",
+    "better-auth": "^1.7.5",
+    "hono": "^4.7.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250224.0",
+    "@types/node": "^22.13.9",
+    "typescript": "^5.7.3",
+    "wrangler": "^3.111.0"
+  }
+}
