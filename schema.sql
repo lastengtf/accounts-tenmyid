@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS "session" (
   "updatedAt" DATE NOT NULL,
   "ipAddress" TEXT,
   "userAgent" TEXT,
-  "userId" TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE
+  "userId" TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+  "impersonatedBy" TEXT
 );
 
 CREATE TABLE IF NOT EXISTS "account" (
@@ -241,6 +242,7 @@ INSERT OR IGNORE INTO "oauthClient" (
 -- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE user ADD COLUMN banned INTEGER DEFAULT 0;"
 -- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE user ADD COLUMN banReason TEXT;"
 -- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE user ADD COLUMN banExpires DATE;"
+-- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE session ADD COLUMN impersonatedBy TEXT;"
 --
 -- Promote your initial account to Administrator:
 -- npx wrangler d1 execute accounts-db --remote --command="UPDATE user SET role = 'admin' WHERE email = 'your-email@domain.com';"

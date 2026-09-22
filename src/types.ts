@@ -28,6 +28,7 @@ export interface Session {
   expiresAt: Date;
   ipAddress?: string | null;
   userAgent?: string | null;
+  impersonatedBy?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

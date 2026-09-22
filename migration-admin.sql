@@ -1,0 +1,11 @@
+-- ============================================================
+-- Migration: Add Admin & RBAC columns to "user" and "session" tables
+-- Cloudflare D1 / SQLite
+-- ============================================================
+
+ALTER TABLE "user" ADD COLUMN "role" TEXT DEFAULT 'user';
+ALTER TABLE "user" ADD COLUMN "banned" INTEGER DEFAULT 0;
+ALTER TABLE "user" ADD COLUMN "banReason" TEXT;
+ALTER TABLE "user" ADD COLUMN "banExpires" DATE;
+
+ALTER TABLE "session" ADD COLUMN "impersonatedBy" TEXT;
