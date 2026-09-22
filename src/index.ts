@@ -2,14 +2,30 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import { getAuth } from './auth';
-import type { Env } from './types';
+import type { Env, User, Session } from './types';
+
+// Auth Gateway Views
 import { loginView } from './views/login';
 import { registerView } from './views/register';
 import { consentView } from './views/consent';
-import { profileView } from './views/profile';
-import { developersView } from './views/developers';
 
-const app = new Hono<{ Bindings: Env }>();
+// Account Hub Views
+import { accountProfileView } from './views/account/profile';
+import { accountSecurityView } from './views/account/security';
+import { accountAppsView } from './views/account/apps';
+
+// Admin IAM Views
+import { adminDashboardView } from './views/admin/dashboard';
+import { adminClientsView } from './views/admin/clients';
+import { adminUsersView } from './views/admin/users';
+
+const app = new Hono<{
+  Bindings: Env;
+  Variables: {
+    session?: { user: User; session: Session };
+    adminSession?: { user: User; session: Session };
+  };
+}>();
 
 // Global Error Handler
 app.onError((err, c) => {
@@ -46,16 +62,84 @@ app.use('*', async (c, next) => {
 });
 
 // Helper: Get active user session
-async function getSession(c: any) {
+async function getSession(c: any): Promise<{ user: User; session: Session } | null> {
   try {
     const auth = getAuth(c.env, c.req.raw);
-    return await auth.api.getSession({
+    const res = await auth.api.getSession({
       headers: c.req.raw.headers,
     });
+    if (!res || !res.user) return null;
+    return res as any;
   } catch (err) {
     console.error('Error getting session:', err);
     return null;
   }
+}
+
+// -------------------------------------------------------------
+// Security & RBAC Guards
+// -------------------------------------------------------------
+
+// Require Authentication (For /account/*)
+async function requireAuth(c: any, next: any) {
+  const session = await getSession(c);
+  if (!session?.user) {
+    const isApi = c.req.path.startsWith('/api/');
+    if (isApi) {
+      return c.json({ error: 'Unauthorized: Harap masuk terlebih dahulu' }, 401);
+    }
+    const currentUrl = c.req.url;
+    return c.redirect(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+  }
+  c.set('session', session);
+  return next();
+}
+
+// Require Administrator Role (For /admin/* and /api/admin/*)
+async function requireAdmin(c: any, next: any) {
+  const session = await getSession(c);
+  const isApi = c.req.path.startsWith('/api/');
+
+  if (!session?.user) {
+    if (isApi) {
+      return c.json({ error: 'Unauthorized: Harap masuk terlebih dahulu' }, 401);
+    }
+    const currentUrl = c.req.url;
+    return c.redirect(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+  }
+
+  // Check admin role
+  if (session.user.role !== 'admin') {
+    if (isApi) {
+      return c.json({ error: 'Forbidden: Hak akses Administrator diperlukan' }, 403);
+    }
+    return c.html(`
+      <!DOCTYPE html>
+      <html lang="id" class="h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Akses Ditolak | TEN Accounts</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="h-full flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-8 text-center shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 mx-auto flex items-center justify-center font-bold text-lg mb-4">403</div>
+          <h1 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Akses Terbatas</h1>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed">
+            Halaman ini hanya dapat diakses oleh Administrator ekosistem TEN. Akun Anda (<span class="font-mono text-zinc-700 dark:text-zinc-300">${session.user.email}</span>) tidak memiliki izin role administrator.
+          </p>
+          <a href="/account" class="inline-block px-4 py-2 text-xs font-medium bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition">
+            Kembali ke Akun Saya
+          </a>
+        </div>
+      </body>
+      </html>
+    `, 403);
+  }
+
+  c.set('adminSession', session);
+  return next();
 }
 
 // -------------------------------------------------------------
@@ -69,14 +153,25 @@ app.on(['GET', 'OPTIONS'], '/.well-known/*', async (c) => {
 // -------------------------------------------------------------
 // Better Auth Core Handler (/api/auth/*)
 // -------------------------------------------------------------
-app.on(['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], '/api/auth/*', async (c) => {
-  const auth = getAuth(c.env, c.req.raw);
-  return auth.handler(c.req.raw);
+// Specific override: Revoke all other device sessions
+app.post('/api/auth/revoke-other-sessions', async (c) => {
+  const session = await getSession(c);
+  if (!session?.user || !session?.session) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  try {
+    await c.env.DB.prepare(
+      'DELETE FROM session WHERE userId = ? AND id != ?'
+    ).bind(session.user.id, session.session.id).run();
+
+    return c.json({ success: true });
+  } catch (err: any) {
+    return c.json({ error: err.message || 'Gagal mencabut sesi lain' }, 500);
+  }
 });
 
-// -------------------------------------------------------------
-// Revoke Satellite App Consent
-// -------------------------------------------------------------
+// Specific override: Revoke OAuth Consent
 app.delete('/api/auth/oauth2/consent/:id', async (c) => {
   const session = await getSession(c);
   if (!session?.user) {
@@ -91,19 +186,25 @@ app.delete('/api/auth/oauth2/consent/:id', async (c) => {
 
     return c.json({ success: true });
   } catch (err: any) {
-    return c.json({ error: err.message || 'Failed to revoke consent' }, 500);
+    return c.json({ error: err.message || 'Gagal mencabut izin aplikasi' }, 500);
   }
 });
 
+// Standard Better Auth handler for everything else under /api/auth/*
+app.on(['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], '/api/auth/*', async (c) => {
+  const auth = getAuth(c.env, c.req.raw);
+  return auth.handler(c.req.raw);
+});
+
 // -------------------------------------------------------------
-// Frontend Pages: Minimalist Zinc Aesthetic
+// Zone 1: Public & Auth Gateway Pages
 // -------------------------------------------------------------
 
 // Root redirect
 app.get('/', async (c) => {
   const session = await getSession(c);
   if (session?.user) {
-    return c.redirect('/profile');
+    return c.redirect('/account');
   }
   return c.redirect('/login');
 });
@@ -117,7 +218,7 @@ app.get('/login', async (c) => {
     if (redirectUrl) {
       return c.redirect(redirectUrl);
     }
-    return c.redirect('/profile');
+    return c.redirect('/account');
   }
 
   return c.html(loginView({ redirectUrl }));
@@ -132,7 +233,7 @@ app.get('/register', async (c) => {
     if (redirectUrl) {
       return c.redirect(redirectUrl);
     }
-    return c.redirect('/profile');
+    return c.redirect('/account');
   }
 
   return c.html(registerView({ redirectUrl }));
@@ -146,7 +247,6 @@ app.get('/consent', async (c) => {
 
   const session = await getSession(c);
   if (!session?.user) {
-    // Save the entire authorization request URL to redirect back after login
     const currentUrl = c.req.url;
     return c.redirect(`/login?redirect=${encodeURIComponent(currentUrl)}`);
   }
@@ -175,14 +275,67 @@ app.get('/consent', async (c) => {
   );
 });
 
-// User Profile & Authorized Satellite Apps Management Page
-app.get('/profile', async (c) => {
-  const session = await getSession(c);
-  if (!session?.user) {
-    return c.redirect('/login');
+// Legacy URL backwards compatibility
+app.get('/profile', (c) => c.redirect('/account/profile'));
+app.get('/developers', (c) => c.redirect('/admin/clients'));
+
+// -------------------------------------------------------------
+// Zone 2: My Account Hub (/account/*) - Self-service for all users
+// -------------------------------------------------------------
+
+app.use('/account', requireAuth);
+app.use('/account/*', requireAuth);
+
+// Account root redirect
+app.get('/account', (c) => c.redirect('/account/profile'));
+
+// 1. Account Profile Page
+app.get('/account/profile', async (c) => {
+  const session = c.get('session')!;
+  return c.html(accountProfileView({ user: session.user }));
+});
+
+// 2. Account Security & Active Sessions Page
+app.get('/account/security', async (c) => {
+  const session = c.get('session')!;
+
+  let sessions: Session[] = [];
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT 
+        id, 
+        userId, 
+        token, 
+        expiresAt, 
+        ipAddress, 
+        userAgent, 
+        createdAt, 
+        updatedAt 
+      FROM session 
+      WHERE userId = ? 
+      ORDER BY createdAt DESC
+    `).bind(session.user.id).all<any>();
+
+    if (results) {
+      sessions = results;
+    }
+  } catch (err) {
+    console.error('Error querying sessions:', err);
   }
 
-  // Query authorized satellite apps for this user
+  return c.html(
+    accountSecurityView({
+      user: session.user,
+      sessions,
+      currentSessionToken: session.session?.token || '',
+    })
+  );
+});
+
+// 3. Authorized Satellite Apps Page
+app.get('/account/apps', async (c) => {
+  const session = c.get('session')!;
+
   let authorizedApps: Array<{
     id: string;
     clientId: string;
@@ -213,7 +366,7 @@ app.get('/profile', async (c) => {
   }
 
   return c.html(
-    profileView({
+    accountAppsView({
       user: session.user,
       authorizedApps,
     })
@@ -221,15 +374,50 @@ app.get('/profile', async (c) => {
 });
 
 // -------------------------------------------------------------
-// Developer Portal: Satellite Clients Management
+// Zone 3: Admin & IAM Console (/admin/* & /api/admin/*) - RBAC Admin only
 // -------------------------------------------------------------
 
-// Developer Portal View
-app.get('/developers', async (c) => {
-  const session = await getSession(c);
-  if (!session?.user) {
-    return c.redirect('/login?redirect=/developers');
+app.use('/admin', requireAdmin);
+app.use('/admin/*', requireAdmin);
+app.use('/api/admin/*', requireAdmin);
+
+// 1. Admin Dashboard / Overview
+app.get('/admin', async (c) => {
+  const session = c.get('adminSession')!;
+
+  let totalUsers = 0;
+  let totalClients = 0;
+  let totalSessions = 0;
+
+  try {
+    const [uCount, cCount, sCount] = await Promise.all([
+      c.env.DB.prepare('SELECT COUNT(*) as count FROM "user"').first<{ count: number }>(),
+      c.env.DB.prepare('SELECT COUNT(*) as count FROM oauthClient').first<{ count: number }>(),
+      c.env.DB.prepare('SELECT COUNT(*) as count FROM session').first<{ count: number }>(),
+    ]);
+
+    totalUsers = uCount?.count || 0;
+    totalClients = cCount?.count || 0;
+    totalSessions = sCount?.count || 0;
+  } catch (err) {
+    console.error('Error querying admin metrics:', err);
   }
+
+  return c.html(
+    adminDashboardView({
+      user: session.user,
+      stats: {
+        totalUsers,
+        totalClients,
+        totalSessions,
+      },
+    })
+  );
+});
+
+// 2. Admin Satellite Clients Management
+app.get('/admin/clients', async (c) => {
+  const session = c.get('adminSession')!;
 
   let clients: any[] = [];
   try {
@@ -241,6 +429,7 @@ app.get('/developers', async (c) => {
         name, 
         redirectUris, 
         scopes, 
+        skipConsent, 
         createdAt 
       FROM oauthClient 
       ORDER BY createdAt DESC
@@ -254,27 +443,59 @@ app.get('/developers', async (c) => {
   }
 
   return c.html(
-    developersView({
+    adminClientsView({
       user: session.user,
       clients,
     })
   );
 });
 
-// Create new Satellite OAuth Client
-app.post('/api/developers/clients', async (c) => {
-  const session = await getSession(c);
-  if (!session?.user) {
-    return c.json({ error: 'Unauthorized' }, 401);
+// 3. Admin Users Directory
+app.get('/admin/users', async (c) => {
+  const session = c.get('adminSession')!;
+
+  let users: any[] = [];
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT 
+        id, 
+        name, 
+        email, 
+        emailVerified, 
+        role, 
+        createdAt 
+      FROM "user" 
+      ORDER BY createdAt DESC
+    `).all<any>();
+
+    if (results) {
+      users = results;
+    }
+  } catch (err) {
+    console.error('Error querying users:', err);
   }
 
+  return c.html(
+    adminUsersView({
+      user: session.user,
+      users,
+    })
+  );
+});
+
+// -------------------------------------------------------------
+// Admin API Endpoints
+// -------------------------------------------------------------
+
+// Admin API: Create Satellite OAuth Client
+const handleCreateClient = async (c: any) => {
   try {
-    const body = await c.req.json<{
+    const body = (await c.req.json()) as {
       name: string;
       clientId?: string;
       redirectUris: string[];
       skipConsent?: boolean;
-    }>();
+    };
 
     if (!body.name || !body.redirectUris || body.redirectUris.length === 0) {
       return c.json({ error: 'Nama aplikasi dan minimal satu Redirect URI wajib diisi.' }, 400);
@@ -284,7 +505,7 @@ app.post('/api/developers/clients', async (c) => {
       ? body.clientId.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-')
       : (body.name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + crypto.randomUUID().slice(0, 6));
 
-    // Generate secure 48-char random client secret
+    // Generate secure random client secret
     const rawSecret = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
     const clientSecret = 'sec_' + rawSecret.slice(0, 40);
     const id = 'client_' + crypto.randomUUID().slice(0, 12);
@@ -331,15 +552,13 @@ app.post('/api/developers/clients', async (c) => {
     console.error('Error creating oauth client:', err);
     return c.json({ error: err.message || 'Gagal mendaftarkan klien' }, 500);
   }
-});
+};
 
-// Rotate Client Secret
-app.post('/api/developers/clients/:id/rotate', async (c) => {
-  const session = await getSession(c);
-  if (!session?.user) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
+app.post('/api/admin/clients', handleCreateClient);
+app.post('/api/developers/clients', handleCreateClient); // Legacy compatibility
 
+// Admin API: Rotate Satellite Client Secret
+const handleRotateSecret = async (c: any) => {
   const clientId = c.req.param('id');
   try {
     const rawSecret = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
@@ -354,21 +573,51 @@ app.post('/api/developers/clients/:id/rotate', async (c) => {
   } catch (err: any) {
     return c.json({ error: err.message || 'Gagal memutar secret' }, 500);
   }
-});
+};
 
-// Delete Satellite Client
-app.delete('/api/developers/clients/:id', async (c) => {
-  const session = await getSession(c);
-  if (!session?.user) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
+app.post('/api/admin/clients/:id/rotate', handleRotateSecret);
+app.post('/api/developers/clients/:id/rotate', handleRotateSecret); // Legacy compatibility
 
+// Admin API: Delete Satellite Client
+const handleDeleteClient = async (c: any) => {
   const clientId = c.req.param('id');
   try {
     await c.env.DB.prepare('DELETE FROM oauthClient WHERE id = ?').bind(clientId).run();
     return c.json({ success: true });
   } catch (err: any) {
     return c.json({ error: err.message || 'Gagal menghapus klien' }, 500);
+  }
+};
+
+app.delete('/api/admin/clients/:id', handleDeleteClient);
+app.delete('/api/developers/clients/:id', handleDeleteClient); // Legacy compatibility
+
+// Admin API: Change User Role (RBAC)
+app.post('/api/admin/users/:id/role', async (c) => {
+  const session = c.get('adminSession')!;
+  const targetUserId = c.req.param('id');
+
+  try {
+    const body = (await c.req.json()) as { role: string };
+
+    if (!body.role || !['user', 'admin'].includes(body.role)) {
+      return c.json({ error: 'Role tidak valid. Gunakan "user" atau "admin".' }, 400);
+    }
+
+    // Safety guard: Admin cannot demote themselves
+    if (targetUserId === session.user.id && body.role !== 'admin') {
+      return c.json({ error: 'Anda tidak dapat mencabut status administrator dari akun Anda sendiri.' }, 400);
+    }
+
+    const now = Date.now();
+    await c.env.DB.prepare(
+      'UPDATE "user" SET role = ?, updatedAt = ? WHERE id = ?'
+    ).bind(body.role, now, targetUserId).run();
+
+    return c.json({ success: true, role: body.role });
+  } catch (err: any) {
+    console.error('Error changing user role:', err);
+    return c.json({ error: err.message || 'Gagal memperbarui role pengguna' }, 500);
   }
 });
 

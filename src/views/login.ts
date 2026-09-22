@@ -128,7 +128,7 @@ export function loginView({ error, redirectUrl = '' }: LoginProps = {}): string 
 
           // Handle redirect
           const urlParams = new URLSearchParams(window.location.search);
-          const callbackUrl = redirectInput || urlParams.get('redirect') || urlParams.get('callbackURL') || '/profile';
+          const callbackUrl = redirectInput || urlParams.get('redirect') || urlParams.get('callbackURL') || '/account';
           window.location.href = callbackUrl;
         } catch (err) {
           showError('Gagal memproses permintaan: ' + (err.message || 'Kesalahan jaringan.'));

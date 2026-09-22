@@ -1,10 +1,12 @@
 import { betterAuth } from 'better-auth';
 import { jwt } from 'better-auth/plugins/jwt';
 import { oauthProvider } from '@better-auth/oauth-provider';
+import { admin } from 'better-auth/plugins/admin';
 import type { Env } from './types';
 
 /**
  * Creates and returns a Better Auth instance configured for Cloudflare Workers and D1.
+ * Equipped with OAuth 2.1 Provider, JWT signing, and RBAC Admin plugin.
  * 
  * @param env Cloudflare Worker environment bindings
  * @param request Optional incoming HTTP request for dynamic cookie domain & origin handling
@@ -46,6 +48,9 @@ export function getAuth(env: Env, request?: Request) {
         loginPage: '/login',
         consentPage: '/consent',
         allowPublicClientPrelogin: true,
+      }),
+      admin({
+        defaultRole: 'user',
       }),
     ],
   });

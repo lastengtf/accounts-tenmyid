@@ -11,7 +11,11 @@ CREATE TABLE IF NOT EXISTS "user" (
   "emailVerified" INTEGER NOT NULL,
   "image" TEXT,
   "createdAt" DATE NOT NULL,
-  "updatedAt" DATE NOT NULL
+  "updatedAt" DATE NOT NULL,
+  "role" TEXT DEFAULT 'user',
+  "banned" INTEGER DEFAULT 0,
+  "banReason" TEXT,
+  "banExpires" DATE
 );
 
 CREATE TABLE IF NOT EXISTS "session" (
@@ -230,3 +234,15 @@ INSERT OR IGNORE INTO "oauthClient" (
   strftime('%s', 'now') * 1000,
   strftime('%s', 'now') * 1000
 );
+
+-- ============================================================
+-- Migration Helpers (Run these on D1 if user table already exists)
+-- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE user ADD COLUMN role TEXT DEFAULT 'user';"
+-- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE user ADD COLUMN banned INTEGER DEFAULT 0;"
+-- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE user ADD COLUMN banReason TEXT;"
+-- npx wrangler d1 execute accounts-db --remote --command="ALTER TABLE user ADD COLUMN banExpires DATE;"
+--
+-- Promote your initial account to Administrator:
+-- npx wrangler d1 execute accounts-db --remote --command="UPDATE user SET role = 'admin' WHERE email = 'your-email@domain.com';"
+-- ============================================================
+

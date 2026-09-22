@@ -3,6 +3,7 @@ export interface LayoutProps {
   user?: {
     name: string;
     email: string;
+    role?: string | null;
   } | null;
   content: string;
   scripts?: string;
@@ -44,17 +45,20 @@ export function layout({ title, user, content, scripts = "" }: LayoutProps): str
         <div class="w-7 h-7 rounded-md bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 flex items-center justify-center font-bold text-xs">
           TEN
         </div>
-        <span class="text-sm">accounts<span class="text-zinc-400 dark:text-zinc-500">.ten.my.id</span></span>
+        <span class="text-sm font-semibold">accounts<span class="text-zinc-400 dark:text-zinc-500 font-normal">.ten.my.id</span></span>
       </a>
 
       <div class="flex items-center gap-3">
         ${user ? `
-          <a href="/developers" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition">
-            Klien Satelit
-          </a>
-          <a href="/profile" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition flex items-center gap-1.5">
+          ${user.role === 'admin' ? `
+            <a href="/admin" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition flex items-center gap-1.5 px-2.5 py-1 rounded bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+              Konsol Admin
+            </a>
+          ` : ''}
+          <a href="/account" class="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            ${escapeHtml(user.email)}
+            ${escapeHtml(user.name || user.email)}
           </a>
           <button id="header-logout-btn" class="text-xs px-2.5 py-1 rounded border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
             Keluar
