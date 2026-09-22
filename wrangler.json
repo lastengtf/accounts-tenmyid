@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "accounts-sso",
+  "name": "accounts-tenmyid",
   "main": "src/index.ts",
   "compatibility_date": "2024-11-01",
   "compatibility_flags": [
@@ -14,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "accounts-db",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_id": "09932dcd-1caf-4fea-950e-79fc22fa17ae"
     }
   ],
   "routes": [
