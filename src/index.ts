@@ -10,6 +10,12 @@ import { profileView } from './views/profile';
 
 const app = new Hono<{ Bindings: Env }>();
 
+// Global Error Handler
+app.onError((err, c) => {
+  console.error('Worker Error:', err);
+  return c.json({ error: err.message || 'Internal Server Error' }, 500);
+});
+
 // Security Headers (CSP, XSS, Frame options)
 app.use('*', secureHeaders());
 

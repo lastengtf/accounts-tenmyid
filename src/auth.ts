@@ -24,12 +24,9 @@ export function getAuth(env: Env, request?: Request) {
   const baseUrl = env.BETTER_AUTH_URL || (isLocal ? 'http://localhost:8787' : 'https://accounts.ten.my.id');
 
   return betterAuth({
-    database: {
-      db: env.DB,
-      type: 'sqlite',
-    },
+    database: env.DB,
     baseURL: baseUrl,
-    secret: env.BETTER_AUTH_SECRET,
+    secret: env.BETTER_AUTH_SECRET || 'dev-fallback-secret-ten-accounts-32chars-min',
     emailAndPassword: {
       enabled: true,
       autoSignIn: true,

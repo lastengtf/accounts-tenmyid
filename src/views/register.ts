@@ -147,7 +147,14 @@ export function registerView({ error, redirectUrl = '' }: RegisterProps = {}): s
             body: JSON.stringify({ name, email, password })
           });
 
-          const data = await res.json();
+          let data;
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            data = await res.json();
+          } else {
+            const text = await res.text();
+            data = { message: text || ('Server Error (' + res.status + ')') };
+          }
 
           if (!res.ok) {
             showError(data.message || data.error || 'Gagal mendaftar. Email mungkin sudah terdaftar.');
@@ -161,7 +168,7 @@ export function registerView({ error, redirectUrl = '' }: RegisterProps = {}): s
           const callbackUrl = redirectInput || urlParams.get('redirect') || urlParams.get('callbackURL') || '/profile';
           window.location.href = callbackUrl;
         } catch (err) {
-          showError('Terjadi kesalahan jaringan. Silakan coba lagi.');
+          showError('Gagal memproses permintaan: ' + (err.message || 'Kesalahan jaringan.'));
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<span>Daftar Akun</span>';
         }
